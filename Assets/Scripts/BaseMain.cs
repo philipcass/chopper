@@ -27,7 +27,7 @@ public class BaseMain : MonoBehaviour {
         
         _stage = Futile.stage;
      
-        this.GoToPage(BPageType.MenuPage);
+        this.GoToPage(BPageType.InGamePage);
     }
  
     public void GoToPage(BPageType pageType) {
