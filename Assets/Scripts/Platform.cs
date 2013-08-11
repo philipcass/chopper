@@ -6,6 +6,7 @@ public class Platform : MonoBehaviour {
     FPNodeLink link;
     FSprite sprite;
     BoxCollider boxCollider;
+	FContainer holder;
 
     public static Platform Create() {
         GameObject platformGO = new GameObject("Platform");
@@ -13,18 +14,20 @@ public class Platform : MonoBehaviour {
         return platform;
     }
  
-    public void Init(Vector2 startPos) {
+    public void Init(Vector2 startPos, FContainer container) {
      
         gameObject.transform.position = new Vector3(startPos.x * FPhysics.POINTS_TO_METERS, startPos.y * FPhysics.POINTS_TO_METERS, 0);
      
         sprite = new FSprite(Futile.whiteElement);
         sprite.width = 1000;
         sprite.SetPosition(startPos);
-        Futile.stage.AddChild(sprite);
+		
+		container.AddChild(holder = new FContainer());
+        holder.AddChild(sprite);
      
         InitPhysics();
      
-        Futile.stage.ListenForUpdate(HandleUpdate);
+        holder.ListenForUpdate(HandleUpdate);
     }
  
     public void Destroy() {
@@ -49,13 +52,6 @@ public class Platform : MonoBehaviour {
     }
 
     void HandleUpdate() {
-        if(Input.GetKey(KeyCode.Space))
-            gameObject.GetComponent<Rigidbody>().AddForce(Vector3.up*100);
-        if(Input.GetKey(KeyCode.LeftArrow))
-            gameObject.GetComponent<Rigidbody>().AddForce(Vector3.left*10);
-        if(Input.GetKey(KeyCode.RightArrow))
-            gameObject.GetComponent<Rigidbody>().AddForce(Vector3.right*10);
-        
         sprite.SetPosition(GetPos());
     }
  

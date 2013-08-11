@@ -5,7 +5,9 @@ using System;
 public class Person : MonoBehaviour {
     FPNodeLink link;
     FSprite sprite;
+    FContainer holder;
     BoxCollider boxCollider;
+	public Chopper parent{get; set;}
 
     public static Person Create() {
         GameObject personGO = new GameObject("Person");
@@ -13,20 +15,24 @@ public class Person : MonoBehaviour {
         return person;
     }
  
-    public void Init(Vector2 startPos) {
+    public void Init(Vector2 startPos, FContainer container) {
      
         gameObject.transform.position = new Vector3(startPos.x * FPhysics.POINTS_TO_METERS, startPos.y * FPhysics.POINTS_TO_METERS, 0);
      
         sprite = new FSprite(Futile.whiteElement);
         sprite.SetPosition(startPos);
-        Futile.stage.AddChild(sprite);
+		
+		container.AddChild(holder = new FContainer());
+        holder.AddChild(sprite);
      
         InitPhysics();
      
-        Futile.stage.ListenForUpdate(HandleUpdate);
+        holder.ListenForUpdate(HandleUpdate);
     }
  
     public void Destroy() {
+		holder.RemoveListenForUpdate();
+		sprite.RemoveFromContainer();
         UnityEngine.Object.Destroy(gameObject);
     }
  
@@ -34,7 +40,7 @@ public class Person : MonoBehaviour {
         Rigidbody rb = gameObject.AddComponent<Rigidbody>();
         rb.constraints = RigidbodyConstraints.FreezePositionZ | RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationY;
         rb.angularDrag = 5.0f;
-        rb.mass = 10.0f;
+        rb.mass = 1.0f;
         rb.drag = 0.8f;
      
         boxCollider = gameObject.AddComponent<BoxCollider>();
@@ -55,6 +61,7 @@ public class Person : MonoBehaviour {
 
     void HandleUpdate() {
         sprite.SetPosition(GetPos());
+		Debug.Log(rigidbody.velocity);
     }
  
     void HandleFixedUpdate() {
@@ -65,6 +72,17 @@ public class Person : MonoBehaviour {
         return new Vector2(transform.position.x * FPhysics.METERS_TO_POINTS, transform.position.y * FPhysics.METERS_TO_POINTS);
     }
     
+	void OnCollisionEnter(Collision coll) {
+		Person person = coll.collider.gameObject.GetComponent<Person>();
+
+		if (person != null && parent != null)
+		{
+			parent.OnCollisionEnter(coll);
+		}
+
+    }
+
+
 }
 
 

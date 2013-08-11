@@ -4,8 +4,13 @@ using System;
 
 public class Chopper : MonoBehaviour {
     FPNodeLink link;
-    FSprite sprite;
+    public FSprite sprite;
     BoxCollider boxCollider;
+	FContainer holder;
+	float _leftRight = 0;
+	float _upDown = 0;
+	GameObject _lastLink;
+	int _personCount = 0;
 
     public static Chopper Create() {
         GameObject chopperGO = new GameObject("Chopper");
@@ -13,17 +18,21 @@ public class Chopper : MonoBehaviour {
         return chopper;
     }
  
-    public void Init(Vector2 startPos) {
+    public void Init(Vector2 startPos, FContainer container) {
      
         gameObject.transform.position = new Vector3(startPos.x * FPhysics.POINTS_TO_METERS, startPos.y * FPhysics.POINTS_TO_METERS, 0);
      
         sprite = new FSprite(Futile.whiteElement);
         sprite.SetPosition(startPos);
-        Futile.stage.AddChild(sprite);
+		
+		container.AddChild(holder = new FContainer());
+        holder.AddChild(sprite);
      
         InitPhysics();
      
-        Futile.stage.ListenForUpdate(HandleUpdate);
+        holder.ListenForUpdate(HandleUpdate);
+		
+		_lastLink = this.gameObject;
     }
  
     public void Destroy() {
@@ -34,8 +43,9 @@ public class Chopper : MonoBehaviour {
         Rigidbody rb = gameObject.AddComponent<Rigidbody>();
         rb.constraints = RigidbodyConstraints.FreezePositionZ | RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationY;
         rb.angularDrag = 5.0f;
-        rb.mass = 10.0f;
-        rb.drag = 0.8f;
+        rb.mass = 1f;
+        rb.drag = 1f;
+		RXWatcher.Watch(rb);
      
         boxCollider = gameObject.AddComponent<BoxCollider>();
         boxCollider.size = new Vector3(sprite.width, sprite.height, 100) * FPhysics.POINTS_TO_METERS;
@@ -54,17 +64,34 @@ public class Chopper : MonoBehaviour {
     }
 
     void HandleUpdate() {
-        if(Input.GetKey(KeyCode.Space)) {
-            gameObject.GetComponent<Rigidbody>().AddForce(Vector3.up * 100);
-        }
+        if(Input.GetKey(KeyCode.UpArrow)) {
+            _upDown += gameObject.GetComponent<Rigidbody>().mass;
+        }else if(Input.GetKey(KeyCode.DownArrow)) {
+            _upDown -= gameObject.GetComponent<Rigidbody>().mass;
+        }else{
+			_upDown*=0.9f;
+		}
+		
         if(Input.GetKey(KeyCode.LeftArrow)) {
-            gameObject.GetComponent<Rigidbody>().AddForce(Vector3.left * 10);
-        }
-        if(Input.GetKey(KeyCode.RightArrow)) {
-            gameObject.GetComponent<Rigidbody>().AddForce(Vector3.right * 10);
-        }
+			_leftRight += gameObject.GetComponent<Rigidbody>().mass;
+		}else if(Input.GetKey(KeyCode.RightArrow)) {
+			_leftRight -= gameObject.GetComponent<Rigidbody>().mass;
+        } else {
+			_leftRight*=0.9f;
+		}
+		
+		if(Input.GetKey(KeyCode.Space)){
+			this.rigidbody.AddExplosionForce(this._personCount*50, this.transform.position, 1);
+		}
         
+		_upDown = Mathf.Clamp(_upDown, -50, 50);
+		_leftRight = Mathf.Clamp(_leftRight, -50, 50);
+		
+        gameObject.GetComponent<Rigidbody>().AddForce(Vector3.left * _leftRight);
+        gameObject.GetComponent<Rigidbody>().AddForce(Vector3.up * _upDown);
         sprite.SetPosition(GetPos());
+		
+		
     }
  
     void HandleFixedUpdate() {
@@ -75,7 +102,24 @@ public class Chopper : MonoBehaviour {
         return new Vector2(transform.position.x * FPhysics.METERS_TO_POINTS, transform.position.y * FPhysics.METERS_TO_POINTS);
     }
     
-    void OnCollisionEnter(Collision coll) {
+	public void OnCollisionEnter(Collision coll) {
+		Person person = coll.collider.gameObject.GetComponent<Person>();
+
+		if (person != null && person.parent == null)
+		{
+			HingeJoint hinge = this._lastLink.AddComponent<HingeJoint>();
+			hinge.connectedBody = person.rigidbody;
+			JointSpring jspring = hinge.spring;
+
+			jspring.spring = 0.1f;	
+			hinge.spring = jspring;
+			hinge.axis = new Vector3(0.0f, 0.0f, 1.0f);
+			
+			person.parent = this;
+			_lastLink = person.gameObject;
+			this._personCount++;
+		}
+
     }
 
 
