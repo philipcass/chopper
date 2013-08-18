@@ -6,11 +6,11 @@ public class Chopper : MonoBehaviour {
     FPNodeLink link;
     public FSprite sprite;
     BoxCollider boxCollider;
-	FContainer holder;
-	float _leftRight = 0;
-	float _upDown = 0;
-	GameObject _lastLink;
-	int _personCount = 0;
+    FContainer holder;
+    float _leftRight = 0;
+    float _upDown = 0;
+    GameObject _lastLink;
+    int _personCount = 0;
 
     public static Chopper Create() {
         GameObject chopperGO = new GameObject("Chopper");
@@ -24,15 +24,15 @@ public class Chopper : MonoBehaviour {
      
         sprite = new FSprite(Futile.whiteElement);
         sprite.SetPosition(startPos);
-		
-		container.AddChild(holder = new FContainer());
+     
+        container.AddChild(holder = new FContainer());
         holder.AddChild(sprite);
      
         InitPhysics();
      
         holder.ListenForUpdate(HandleUpdate);
-		
-		_lastLink = this.gameObject;
+     
+        _lastLink = this.gameObject;
     }
  
     public void Destroy() {
@@ -45,7 +45,7 @@ public class Chopper : MonoBehaviour {
         rb.angularDrag = 5.0f;
         rb.mass = 1f;
         rb.drag = 1f;
-		RXWatcher.Watch(rb);
+        RXWatcher.Watch(rb);
      
         boxCollider = gameObject.AddComponent<BoxCollider>();
         boxCollider.size = new Vector3(sprite.width, sprite.height, 100) * FPhysics.POINTS_TO_METERS;
@@ -64,34 +64,39 @@ public class Chopper : MonoBehaviour {
     }
 
     void HandleUpdate() {
+        //float vaxis = Input.GetAxis("Vertical");
+        //float haxis = Input.GetAxis("Horizontal");
+        
         if(Input.GetKey(KeyCode.UpArrow)) {
             _upDown += gameObject.GetComponent<Rigidbody>().mass;
-        }else if(Input.GetKey(KeyCode.DownArrow)) {
+        } else if(Input.GetKey(KeyCode.DownArrow)) {
             _upDown -= gameObject.GetComponent<Rigidbody>().mass;
-        }else{
-			_upDown*=0.9f;
-		}
-		
-        if(Input.GetKey(KeyCode.LeftArrow)) {
-			_leftRight += gameObject.GetComponent<Rigidbody>().mass;
-		}else if(Input.GetKey(KeyCode.RightArrow)) {
-			_leftRight -= gameObject.GetComponent<Rigidbody>().mass;
         } else {
-			_leftRight*=0.9f;
-		}
-		
-		if(Input.GetKey(KeyCode.Space)){
-			this.rigidbody.AddExplosionForce(this._personCount*50, this.transform.position, 1);
-		}
+            //gameObject.rigidbody.velocity =Vector3.zero;
+        }
+     
+        if(Input.GetKey(KeyCode.LeftArrow)) {
+            _leftRight += gameObject.GetComponent<Rigidbody>().mass;
+        } else if(Input.GetKey(KeyCode.RightArrow)) {
+            _leftRight -= gameObject.GetComponent<Rigidbody>().mass;
+        } else {
+            //gameObject.rigidbody.velocity =Vector3.zero;
+        }
+     
+        if(Input.GetKey(KeyCode.Space)) {
+            this.rigidbody.AddExplosionForce(this._personCount * 25, this.transform.position, 1);
+        }
         
-		_upDown = Mathf.Clamp(_upDown, -50, 50);
-		_leftRight = Mathf.Clamp(_leftRight, -50, 50);
-		
+        _upDown = Mathf.Clamp(_upDown, -50, 50);
+        _leftRight = Mathf.Clamp(_leftRight, -50, 50);
+     
         gameObject.GetComponent<Rigidbody>().AddForce(Vector3.left * _leftRight);
         gameObject.GetComponent<Rigidbody>().AddForce(Vector3.up * _upDown);
         sprite.SetPosition(GetPos());
-		
-		
+        
+        _upDown = _leftRight = 0;
+     
+        Debug.Log(rigidbody.velocity);     
     }
  
     void HandleFixedUpdate() {
@@ -102,23 +107,23 @@ public class Chopper : MonoBehaviour {
         return new Vector2(transform.position.x * FPhysics.METERS_TO_POINTS, transform.position.y * FPhysics.METERS_TO_POINTS);
     }
     
-	public void OnCollisionEnter(Collision coll) {
-		Person person = coll.collider.gameObject.GetComponent<Person>();
+    public void OnCollisionEnter(Collision coll) {
+        Person person = coll.collider.gameObject.GetComponent<Person>();
 
-		if (person != null && person.parent == null)
-		{
-			HingeJoint hinge = this._lastLink.AddComponent<HingeJoint>();
-			hinge.connectedBody = person.rigidbody;
-			JointSpring jspring = hinge.spring;
+        if(person != null && person.parent == null) {
+            HingeJoint hinge = this._lastLink.AddComponent<HingeJoint>();
+            hinge.connectedBody = person.rigidbody;
+            hinge.breakForce = 10;
+            JointSpring jspring = hinge.spring;
 
-			jspring.spring = 0.1f;	
-			hinge.spring = jspring;
-			hinge.axis = new Vector3(0.0f, 0.0f, 1.0f);
-			
-			person.parent = this;
-			_lastLink = person.gameObject;
-			this._personCount++;
-		}
+            jspring.spring = 0.1f;   
+            hinge.spring = jspring;
+            hinge.axis = new Vector3(0.0f, 0.0f, 1.0f);
+         
+            person.parent = this;
+            _lastLink = person.gameObject;
+            this._personCount++;
+        }
 
     }
 

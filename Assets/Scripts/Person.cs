@@ -7,7 +7,8 @@ public class Person : MonoBehaviour {
     FSprite sprite;
     FContainer holder;
     BoxCollider boxCollider;
-	public Chopper parent{get; set;}
+
+    public Chopper parent{ get; set; }
 
     public static Person Create() {
         GameObject personGO = new GameObject("Person");
@@ -21,8 +22,8 @@ public class Person : MonoBehaviour {
      
         sprite = new FSprite(Futile.whiteElement);
         sprite.SetPosition(startPos);
-		
-		container.AddChild(holder = new FContainer());
+     
+        container.AddChild(holder = new FContainer());
         holder.AddChild(sprite);
      
         InitPhysics();
@@ -31,8 +32,8 @@ public class Person : MonoBehaviour {
     }
  
     public void Destroy() {
-		holder.RemoveListenForUpdate();
-		sprite.RemoveFromContainer();
+        holder.RemoveListenForUpdate();
+        sprite.RemoveFromContainer();
         UnityEngine.Object.Destroy(gameObject);
     }
  
@@ -61,7 +62,6 @@ public class Person : MonoBehaviour {
 
     void HandleUpdate() {
         sprite.SetPosition(GetPos());
-		Debug.Log(rigidbody.velocity);
     }
  
     void HandleFixedUpdate() {
@@ -72,13 +72,12 @@ public class Person : MonoBehaviour {
         return new Vector2(transform.position.x * FPhysics.METERS_TO_POINTS, transform.position.y * FPhysics.METERS_TO_POINTS);
     }
     
-	void OnCollisionEnter(Collision coll) {
-		Person person = coll.collider.gameObject.GetComponent<Person>();
+    void OnCollisionEnter(Collision coll) {
+        Person person = coll.collider.gameObject.GetComponent<Person>();
 
-		if (person != null && parent != null)
-		{
-			parent.OnCollisionEnter(coll);
-		}
+        if(person != null && parent != null) {
+            parent.OnCollisionEnter(coll);
+        }
 
     }
 
