@@ -9,7 +9,7 @@ public class Chopper : MonoBehaviour {
     FContainer holder;
     float _leftRight = 0;
     float _upDown = 0;
-    GameObject _lastLink;
+    public GameObject _lastLink;
     int _personCount = 0;
 
     public static Chopper Create() {
@@ -68,35 +68,37 @@ public class Chopper : MonoBehaviour {
         //float haxis = Input.GetAxis("Horizontal");
         
         if(Input.GetKey(KeyCode.UpArrow)) {
-            _upDown += gameObject.GetComponent<Rigidbody>().mass;
+            _upDown ++;
         } else if(Input.GetKey(KeyCode.DownArrow)) {
-            _upDown -= gameObject.GetComponent<Rigidbody>().mass;
+            _upDown --;
         } else {
-            //gameObject.rigidbody.velocity =Vector3.zero;
+            _upDown*=.9f;
         }
      
         if(Input.GetKey(KeyCode.LeftArrow)) {
-            _leftRight += gameObject.GetComponent<Rigidbody>().mass;
+            _leftRight ++;
         } else if(Input.GetKey(KeyCode.RightArrow)) {
-            _leftRight -= gameObject.GetComponent<Rigidbody>().mass;
+            _leftRight --;
         } else {
-            //gameObject.rigidbody.velocity =Vector3.zero;
+            _leftRight*=.9f;
         }
      
-        if(Input.GetKey(KeyCode.Space)) {
-            this.rigidbody.AddExplosionForce(this._personCount * 25, this.transform.position, 1);
-        }
-        
-        _upDown = Mathf.Clamp(_upDown, -50, 50);
-        _leftRight = Mathf.Clamp(_leftRight, -50, 50);
-     
+        _upDown = Mathf.Clamp(_upDown, -50, 500);
+        _leftRight = Mathf.Clamp(_leftRight, -50, 500);
+
         gameObject.GetComponent<Rigidbody>().AddForce(Vector3.left * _leftRight);
         gameObject.GetComponent<Rigidbody>().AddForce(Vector3.up * _upDown);
-        sprite.SetPosition(GetPos());
-        
-        _upDown = _leftRight = 0;
-     
-        Debug.Log(rigidbody.velocity);     
+
+
+		if(Input.GetKey(KeyCode.Space)) {
+            this.rigidbody.AddExplosionForce(this._personCount * 25, this.transform.position, 1);
+        }else{
+		this.rigidbody.velocity = new Vector3(Mathf.Clamp(rigidbody.velocity.x, -1, 1), 
+												Mathf.Clamp(rigidbody.velocity.y, -1, 1),
+												0);
+		}
+
+		sprite.SetPosition(GetPos());
     }
  
     void HandleFixedUpdate() {

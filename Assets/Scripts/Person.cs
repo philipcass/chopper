@@ -7,6 +7,7 @@ public class Person : MonoBehaviour {
     FSprite sprite;
     FContainer holder;
     BoxCollider boxCollider;
+	bool landed = true;
 
     public Chopper parent{ get; set; }
 
@@ -78,6 +79,15 @@ public class Person : MonoBehaviour {
         if(person != null && parent != null) {
             parent.OnCollisionEnter(coll);
         }
+
+        Platform platform = coll.collider.gameObject.GetComponent<Platform>();
+
+        if(platform != null && parent != null && landed == false) {
+            Debug.Log("GAME OVER");
+			this.rigidbody.AddExplosionForce(10000, this.transform.position, 10000);
+        }else if(platform == null && landed == true){
+			landed = false;
+		}
 
     }
 

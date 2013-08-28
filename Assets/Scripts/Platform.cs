@@ -19,7 +19,7 @@ public class Platform : MonoBehaviour {
         gameObject.transform.position = new Vector3(startPos.x * FPhysics.POINTS_TO_METERS, startPos.y * FPhysics.POINTS_TO_METERS, 0);
      
         sprite = new FSprite(Futile.whiteElement);
-        sprite.width = 1000;
+        sprite.width = 100;
         sprite.SetPosition(startPos);
 		
 		container.AddChild(holder = new FContainer());
