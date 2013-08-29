@@ -10,7 +10,7 @@ public class Chopper : MonoBehaviour {
     float _leftRight = 0;
     float _upDown = 0;
     public GameObject _lastLink;
-    int _personCount = 0;
+    public int PersonCount = 0;
 
     public static Chopper Create() {
         GameObject chopperGO = new GameObject("Chopper");
@@ -22,7 +22,7 @@ public class Chopper : MonoBehaviour {
      
         gameObject.transform.position = new Vector3(startPos.x * FPhysics.POINTS_TO_METERS, startPos.y * FPhysics.POINTS_TO_METERS, 0);
      
-        sprite = new FSprite(Futile.whiteElement);
+        sprite = new FSprite(Futile.atlasManager.GetElementWithName("chopper"));
         sprite.SetPosition(startPos);
      
         container.AddChild(holder = new FContainer());
@@ -91,7 +91,7 @@ public class Chopper : MonoBehaviour {
 
 
 		if(Input.GetKey(KeyCode.Space)) {
-            this.rigidbody.AddExplosionForce(this._personCount * 25, this.transform.position, 1);
+            this.rigidbody.AddExplosionForce(this.PersonCount * 25, this.transform.position, 1);
         }else{
 		this.rigidbody.velocity = new Vector3(Mathf.Clamp(rigidbody.velocity.x, -1, 1), 
 												Mathf.Clamp(rigidbody.velocity.y, -1, 1),
@@ -124,7 +124,7 @@ public class Chopper : MonoBehaviour {
          
             person.parent = this;
             _lastLink = person.gameObject;
-            this._personCount++;
+            this.PersonCount++;
         }
 
     }

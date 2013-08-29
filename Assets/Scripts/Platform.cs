@@ -4,7 +4,7 @@ using System;
 
 public class Platform : MonoBehaviour {
     FPNodeLink link;
-    FSprite sprite;
+    public FSprite sprite;
     BoxCollider boxCollider;
 	FContainer holder;
 
@@ -20,6 +20,7 @@ public class Platform : MonoBehaviour {
      
         sprite = new FSprite(Futile.whiteElement);
         sprite.width = 100;
+        sprite.height = 1000;
         sprite.SetPosition(startPos);
 		
 		container.AddChild(holder = new FContainer());

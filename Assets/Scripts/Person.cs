@@ -8,6 +8,9 @@ public class Person : MonoBehaviour {
     FContainer holder;
     BoxCollider boxCollider;
 	bool landed = true;
+    
+    public delegate void GameOverHandler();
+    public GameOverHandler GameOver;
 
     public Chopper parent{ get; set; }
 
@@ -17,14 +20,14 @@ public class Person : MonoBehaviour {
         return person;
     }
  
-    public void Init(Vector2 startPos, FContainer container) {
+    public void Init(Vector2 startPos, InGamePage container) {
      
         gameObject.transform.position = new Vector3(startPos.x * FPhysics.POINTS_TO_METERS, startPos.y * FPhysics.POINTS_TO_METERS, 0);
      
-        sprite = new FSprite(Futile.whiteElement);
+        sprite = new FSprite(Futile.atlasManager.GetElementWithName("man"));
         sprite.SetPosition(startPos);
      
-        container.AddChild(holder = new FContainer());
+        container.persons.AddChild(holder = new FContainer());
         holder.AddChild(sprite);
      
         InitPhysics();
@@ -84,6 +87,7 @@ public class Person : MonoBehaviour {
 
         if(platform != null && parent != null && landed == false) {
             Debug.Log("GAME OVER");
+            GameOver();
 			this.rigidbody.AddExplosionForce(10000, this.transform.position, 10000);
         }else if(platform == null && landed == true){
 			landed = false;
